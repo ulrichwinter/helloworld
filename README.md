@@ -14,7 +14,7 @@ It features a small HTTP server with the following characteristics:
     * wait again for the same duration
     * start the port 8081 server
 * It emits a basic log message after starting which can be used to test log-based wait strategies.
-
+* It serves a `/echo` endpoint, where alle header values are returned and an externally visible URI for this endpoint is constructed from the relevant proxy headers.  
 ## Example usage
 
 ```

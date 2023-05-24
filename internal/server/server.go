@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -37,6 +38,32 @@ func startServerOnPort(port int, instanceUUID string, delayStart int) {
 	})
 	server.HandleFunc("/uuid", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, instanceUUID)
+	})
+	server.HandleFunc("/echo", func(w http.ResponseWriter, r *http.Request) {
+
+		for name, value := range r.Header {
+			fmt.Fprintf(w, "%s:%s\n", name, value)
+		}
+		fmt.Fprintf(w, "\n\n")
+
+		host := r.Header.Get("X-Forwarded-Host")
+		if host == "" {
+			host, _, _ = net.SplitHostPort(r.Host)
+		}
+		scheme := r.Header.Get("X-Forwarded-Proto")
+		if scheme == "" {
+			if r.TLS == nil {
+				scheme = "http"
+			} else {
+				scheme = "https"
+			}
+		}
+		port := r.Header.Get("X-Forwarded-Port")
+		if port == "" {
+			_, port, _ = net.SplitHostPort(r.Host)
+		}
+		path := r.URL.Path
+		fmt.Fprintf(w, "%s://%s:%s%s", scheme, host, port, path)
 	})
 
 	// Delay before the server starts
